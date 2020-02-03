@@ -20,7 +20,7 @@ def path_checker(path: str,
                  'file': os.path.isfile}
 
     if not check_type in func_dict.keys():
-        raise ValueError("The check_type - '{}' is invalid. Please choose from {'directory', 'file'}".format(path))
+        raise ValueError("The check_type - '{}' - is invalid. Please choose from {'directory', 'file'}".format(path))
 
     exists = func_dict[check_type](path)
 
@@ -31,5 +31,5 @@ def path_checker(path: str,
         return exists
 
     else:
-        raise ValueError("The {} - '{}' does not exist".format(check_type, path))
+        raise ValueError("The {} - '{}' - does not exist".format(check_type, path))
 
