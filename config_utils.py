@@ -77,16 +77,15 @@ class ConfigReader:
         self.exists = path_checker(path=config_fp,
                                    check_type='file',
                                    to_raise = True)
-        self.config_fp = config_fp
         self.config = configparser.ConfigParser()
-        self.config.read(self.config_fp)
+        self.config.read(config_fp)
 
     def get_all(self) -> dict:
 
         """Returns all sections and options in the specified config file.
 
         Returns:
-            all_sections {dict} -- All sections and options in self.config_fp
+            all_sections {dict} -- All sections and options in the config file
                 e.g. {section1: {options1},
                       section2: {options2}}
         """
