@@ -10,7 +10,8 @@ class ConfigWriter:
 
     Keyword Arguments:
         config_details {dict} -- kwarg keywords will become sections; keys and values from
-            arguments (dictionaries) will populate the sections."""
+            arguments (dictionaries) will populate the sections.
+    """
 
     def __init__(self,
                  config_fp: str,
@@ -29,7 +30,8 @@ class ConfigWriter:
             config_details {dict} -- dict of dicts containing config details
 
         Returns:
-            is_valid {bool} -- Indication of whether the config details are in a valid format."""
+            is_valid {bool} -- Indication of whether the config details are in a valid format.
+        """
 
         # TODO: need to validate the dict of dict type
         raise NotImplementedError ('This method has not been implemented yet.')
@@ -42,7 +44,8 @@ class ConfigWriter:
             None
 
         Returns:
-            out_string {string} -- Success message indicating save type and location"""
+            out_string {string} -- Success message indicating save type and location
+        """
 
         exists = path_checker(path=self.config_fp,
                               check_type='file',
@@ -65,7 +68,8 @@ class ConfigReader:
     """Class for reading config files.
 
     Arguments:
-        config_fp {str} -- Path of config file to read"""
+        config_fp {str} -- Path of config file to read
+    """
 
     def __init__(self,
                  config_fp: str):
@@ -74,58 +78,92 @@ class ConfigReader:
                                    check_type='file',
                                    to_raise = True)
         self.config_fp = config_fp
+        self.config = configparser.ConfigParser()
+        self.config.read(self.config_fp)
 
-    @staticmethod
-    def validate(config_dict: dict,
-                 validation_fields: set) -> bool:
+    def get_all(self) -> dict:
 
-        """Validates if all config params expected are present.
-
-        Arguments:
-            config_dict {dict} -- Dict of config params to validate
-            validation_fields {set} -- Names of fields to be present in the config_dict
+        """Returns all sections and options in the specified config file.
 
         Returns:
-            is_valid {bool} -- Whether all expected fields are present in the config_dict"""
+            all_sections {dict} -- All sections and options in self.config_fp
+                e.g. {section1: {options1},
+                      section2: {options2}}
+        """
 
-        is_valid = set(config_dict.keys()) == validation_fields
+        all_sections = {section: dict(self.config[section])
+                        for section in self.config.sections()}
+
+        return all_sections
+
+    @staticmethod
+    def validate_section(section_dict: dict,
+                         validation_options: set) -> bool:
+
+        """Validates if all options expected are present in a section.
+
+        Arguments:
+            section_dict {dict} -- Dict of config options to validate
+            validation_options {set} -- Names of options to be present in the section_dict
+
+        Returns:
+            is_valid {bool} -- Whether all expected fields are present in the section_dict
+        """
+
+        is_valid = set(section_dict.keys()) == validation_options
 
         if is_valid:
             return is_valid
         else:
-            raise ValueError ("Config file is not valid. Please check either the specified config \
-                file or the `validation_fields` specified.")
+            raise ValueError ("Config file is not valid. `section_dict` fields do not match\
+                 `validation_options` specified.")
 
-    def read_config(self,
+    def get_section(self,
                     section_name: str,
                     validate: bool = False,
-                    expected_fields: set = None) -> dict:
+                    validation_options: set = None) -> dict:
 
-        """Method which reads the config file from the config_fp passed.
+        """Returns a section of the specified config file.
 
         Arguments:
-            section_name {str} -- Name of section containing config details to return
-            validate {bool} -- Whether or not to validate the config details
-            expected_fields {set} -- Expected fields expected in the config file
+            section_name {str} -- Name of section to return
+            validate {bool} -- Whether or not to validate the options
+                in the section (default: {False})
+            validation_options {set} -- Names of options to be present in the section_dict
 
         Returns:
-            config_dict {dict} -- Dict of config params"""
+            section_dict {dict} -- Dictionary of config options from the specified section
+        """
 
-        config = configparser.ConfigParser()
-        config.read(self.config_fp)
-        config_dict = dict(config.items(section_name))
+        section_dict = dict(self.config[section_name])
 
         if not validate:
-            return config_dict
+            return section_dict
 
-        if not expected_fields:
-            raise ValueError ("'{}' is an invalid input. Please specify a valid list of \
-                `expected_fields` for validation.".format(expected_fields))
+        if not validation_options:
+            raise ValueError ("'{}' is an invalid input. Please specify a valid set of \
+                `expected_fields` for validation.".format(validation_options))
 
-        is_valid = self.validate(config_dict=config_dict,
-                                 validation_fields=expected_fields)
+        is_valid = self.validate_section(section_dict,
+                                         validation_options=validation_options)
 
         if is_valid:
-            return config_dict
+            return section_dict
 
+    def get_option(self,
+                   section_name: str,
+                   option_name: str) -> str:
 
+        """Returns an option from a section of the specified config file.
+
+        Arguments:
+            section_name {str} -- Name of section to return
+            validate {bool} -- Whether or not to validate the options
+                in the section (default: {False})
+            validation_options {set} -- Names of options to be present in the section_dict
+
+        Returns:
+            section_dict {dict} -- Dictionary of config options from the specified section
+        """
+
+        return self.config.get(section_name, option_name)
