@@ -33,3 +33,55 @@ def path_checker(path: str,
     else:
         raise ValueError("The {} - '{}' - does not exist".format(check_type, path))
 
+def flatten_dict(d: dict):
+
+    """Flattens dictionary with subdictionaries.
+
+    Arguments:
+        d {dict} -- Dict to flatten
+
+    Returns:
+        flattened {dict} -- Flattened dict
+    """
+
+    def items():
+        for key, value in d.items():
+            if isinstance(value, dict):
+                for subkey, subvalue in flatten_dict(value).items():
+                    yield key + "." + subkey, subvalue
+            else:
+                yield key, value
+
+    flattened = dict(items())
+
+    return flattened
+
+def flatten_list(ls: list) -> list:
+
+    """Flattens list with sublists.
+
+    Arguments:
+        ls {list} -- List to flatten
+    Returns:
+        flattened {list} -- Flattened list"""
+
+    flattened = [item for sublist in ls for item in sublist]
+    return flattened
+
+def check_continuous(n: int, l: list):
+
+    """Checks for continuous numbers in a list.
+
+    Arguments:
+        n {int} -- Number of entries in a list
+        l {list} -- List to check
+
+    Returns:
+        any_continuous {bool} -- Whether there are any continuous numbers in l
+    """
+
+    subs = [l[i:i+n] for i in range(len(l)) if len(l[i:i+n]) == n]
+    any_continuous = any([(sorted(sub) in range(min(l), max(l)+1))
+                          for sub in subs])
+
+    return any_continuous
